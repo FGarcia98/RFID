@@ -4,47 +4,35 @@ include('ConnectBDD.php'); // On include le fichier contenant la connexion à la
 class user
 {
     private $_db;
-    private $_login;
-    private $_password;
+    private $_username;
+    private $_mdp;
 
 
-    public function __construct($db)
+    public function __construct($db,$mdp,$username)
     {
         $this->_db = $db;
+        $this->_mdp = $mdp;
+        $this->_username = $username;
     }
-    public function Connexion($login, $password)
+    public function Connexion($username, $mdp)
     {   // Permet à l'utilisateur de se connecter au site
-        $con = $this->_db->prepare("SELECT * FROM user WHERE username = $login AND mdp = $password"); // Requête qui vérifie les informations de l'utilisateur lors de sa connexion
-        $con->execute([$login, $password]);
-        $con = $con->fetch();
-        // on envoi les informations de la requête dans les variables de la classe pour le traitement
-        $this->_id = $con['id_user'];
-        $this->_login = $con['username'];
-        $this->_password = $con['mdp'];
-    }
-    public function compare($login, $password)
-    {   // Retourne true si le Login et le Mot de passe sont correct sinon retourne false
+        $con = $this->_db->prepare("SELECT * FROM user WHERE username = ? AND mdp = ?"); // Requête qui vérifie les informations de l'utilisateur lors de sa connexion
+        $con->execute(array($username, $mdp));
+        $userexist = $con->rowCount();
 
-        if ($login == $this->_login) {
-
-            if ($password == $this->_password) {
-
-                return true;
-            }
+        if ($userexist == 1) {
+            $userinfo = $con->fetch();
+            $_SESSION['id_user'] = $userinfo['id_user'];
+            $_SESSION['username'] = $userinfo['username'];
+            $_SESSION['mdp'] = $userinfo['mdp'];
+        } else if ($userexist == 0) {
+            $erreur = "Mauvais mail ou mot de passe !";
         }
-        return false;
+        if (isset($erreur)) {
+            echo '<h1><font color="red" style="center">' . $erreur . '</font></h1>';
+        }
     }
-    public function getId()
-    {
-        return $this->_id;
-    }
-    public function getLogin()
-    {
-        return $this->_login;
-    }
-
-    public function getPassword()
-    {
-        return $this->_password;
-    }
+   
+   
+   
 }

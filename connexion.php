@@ -1,24 +1,16 @@
 <?php
 session_start();
 include('ConnectBDD.php');
+include('classUser.php');
 if (isset($_POST['co'])) {
 
     $username = $_POST['username'];
     $mdp = $_POST['mdp'];
     if (!empty($username) and !empty($mdp)) {
-        $con = $db->prepare("SELECT * FROM user WHERE username = ? AND mdp = ?"); // Requête qui vérifie les informations de l'utilisateur lors de sa connexion
-        $con->execute(array($username, $mdp));
-        $userexist = $con->rowCount();
-
-        if ($userexist == 1) {
-            $userinfo = $con->fetch();
-            $_SESSION['id_user'] = $userinfo['id_user'];
-            $_SESSION['username'] = $userinfo['username'];
-            $_SESSION['mdp'] = $userinfo['mdp'];
-        } else if ($userexist == 0) {
-            $erreur = "Mauvais mail ou mot de passe !";
-        }
-    }
+        $coUser = new user($db,$username,$mdp); //le mot de passe est correct, on crée l'objet user
+        $db = $coUser->Connexion($username,$mdp);
+      
+}
 }
 ?>
 
@@ -71,7 +63,5 @@ if (!isset($_SESSION['username'])) {
     include("index.php");
 }
 
-if (isset($erreur)) {
-    echo '<h1><font color="red" style="center">' . $erreur . '</font></h1>';
-}
+
 ?>
